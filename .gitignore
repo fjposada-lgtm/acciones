@@ -1,17 +1,17 @@
-# Dependencias
-node_modules/
-
-# Builds
-dist/
-build/
-
-# Variables de entorno
+# Secretos: nunca deben llegar al repositorio.
 .env
 .env.local
+*.pem
+*.key
+secrets.json
+credenciales*.json
 
-# Logs
-*.log
-npm-debug.log*
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
 
 # Sistema operativo
 Thumbs.db
@@ -21,3 +21,10 @@ desktop.ini
 # Editores
 .vscode/
 .idea/
+
+# Nota sobre data/inbox/
+#
+# Las capturas NO estan ignoradas: el flujo las necesita versionadas para que
+# GitHub Actions pueda leerlas. Por eso el repositorio DEBE ser privado, y por
+# eso borrar una imagen despues no la elimina de los commits anteriores.
+# Ver data/inbox/LEEME.md

@@ -1,0 +1,40 @@
+name: Pruebas
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "data/reports/**"
+      - "data/history/**"
+      - "data/state/**"
+      - "reports/**"
+  pull_request:
+  workflow_dispatch:
+
+# Las pruebas solo necesitan leer el codigo.
+permissions:
+  contents: read
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Comprobar que todo compila
+        run: python -m compileall -q scripts tests
+
+      - name: Ejecutar las pruebas
+        run: python -m unittest discover -s tests -v
+
+      - name: Comprobar que la CLI responde
+        run: |
+          python -m scripts.cli --help
+          python -m scripts.cli ventana-horaria --hora-objetivo 8
+          python -m scripts.cli scan

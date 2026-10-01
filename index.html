@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Revision diaria de operaciones</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="salto" href="#contenido">Saltar al contenido</a>
+
+  <header class="cabecera">
+    <div class="envoltura cabecera__fila">
+      <div>
+        <h1 class="cabecera__titulo">Revision diaria de operaciones</h1>
+        <p class="cabecera__sub">
+          Panel de solo lectura. El sistema analiza y recomienda; nunca abre,
+          cierra ni modifica operaciones.
+        </p>
+      </div>
+      <div class="cabecera__estado" id="chip-estado" role="status" aria-live="polite">
+        <span class="chip chip--neutro">Cargando...</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="envoltura" id="contenido">
+
+    <!-- Avisos del sistema (repo publico, correo sin configurar, etc.) -->
+    <section id="avisos" class="avisos" aria-label="Avisos del sistema"></section>
+
+    <!-- Estado del proceso -->
+    <section class="tarjeta" aria-labelledby="t-estado">
+      <h2 class="tarjeta__titulo" id="t-estado">Estado del proceso</h2>
+      <dl class="datos" id="datos-estado">
+        <div class="datos__par">
+          <dt>Estado</dt>
+          <dd id="valor-estado">—</dd>
+        </div>
+        <div class="datos__par">
+          <dt>Fecha y hora de los datos</dt>
+          <dd id="valor-fecha-datos">—</dd>
+        </div>
+        <div class="datos__par">
+          <dt>Ultima actualizacion del sistema</dt>
+          <dd id="valor-actualizado">—</dd>
+        </div>
+        <div class="datos__par">
+          <dt>Entrega por correo</dt>
+          <dd id="valor-correo">—</dd>
+        </div>
+      </dl>
+      <p class="tarjeta__nota" id="detalle-estado"></p>
+    </section>
+
+    <!-- Informe mas reciente -->
+    <section class="tarjeta" aria-labelledby="t-informe">
+      <div class="tarjeta__cabecera">
+        <h2 class="tarjeta__titulo" id="t-informe">Informe mas reciente</h2>
+        <span class="chip" id="chip-atencion" hidden></span>
+      </div>
+
+      <div id="informe-vacio" class="vacio">
+        <p>Todavia no hay ningun informe.</p>
+        <p class="vacio__pista">
+          Sube una captura a <code>data/inbox/</code> y ejecuta el workflow
+          <em>Revision diaria de operaciones</em>.
+        </p>
+      </div>
+
+      <div id="informe" hidden>
+        <div class="resumen" id="resumen-ejecutivo"></div>
+
+        <h3 class="sub">Operaciones</h3>
+        <div class="tabla-scroll">
+          <table class="tabla" id="tabla-posiciones">
+            <caption class="visualmente-oculto">
+              Operaciones leidas en la captura mas reciente
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Instrumento</th>
+                <th scope="col">Producto</th>
+                <th scope="col">Direccion</th>
+                <th scope="col">Apalanc.</th>
+                <th scope="col">Entrada</th>
+                <th scope="col">Actual</th>
+                <th scope="col">Resultado</th>
+                <th scope="col">Recomendacion</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div class="columnas">
+          <div>
+            <h3 class="sub">HECHOS</h3>
+            <p class="sub__nota">Respaldado por la captura o por calculo sobre ella.</p>
+            <ul class="lista" id="lista-hechos"></ul>
+          </div>
+          <div>
+            <h3 class="sub">INTERPRETACION</h3>
+            <p class="sub__nota">Lectura del analista, no un hecho observado.</p>
+            <ul class="lista" id="lista-interpretacion"></ul>
+          </div>
+        </div>
+
+        <h3 class="sub">Recomendaciones</h3>
+        <p class="sub__nota">
+          Apoyo a una decision humana. Ninguna es una orden ejecutable.
+        </p>
+        <div id="recomendaciones"></div>
+
+        <h3 class="sub">Datos faltantes</h3>
+        <ul class="lista lista--tenue" id="lista-faltantes"></ul>
+
+        <p class="acciones">
+          <a class="boton" id="enlace-md" href="#" target="_blank" rel="noopener">
+            Ver el informe completo
+          </a>
+          <a class="boton boton--tenue" id="enlace-json" href="#" target="_blank" rel="noopener">
+            Ver los datos estructurados
+          </a>
+        </p>
+      </div>
+    </section>
+
+    <!-- Historial -->
+    <section class="tarjeta" aria-labelledby="t-historial">
+      <h2 class="tarjeta__titulo" id="t-historial">Historial</h2>
+      <div id="historial-vacio" class="vacio">
+        <p>No hay informes anteriores.</p>
+      </div>
+      <div class="tabla-scroll" id="historial-caja" hidden>
+        <table class="tabla">
+          <caption class="visualmente-oculto">Informes anteriores</caption>
+          <thead>
+            <tr>
+              <th scope="col">Fecha de los datos</th>
+              <th scope="col">Instrumentos</th>
+              <th scope="col">Atencion</th>
+              <th scope="col">Informe</th>
+            </tr>
+          </thead>
+          <tbody id="historial-cuerpo"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="pie">
+      <p>
+        Sistema de apoyo al analisis. No constituye asesoria financiera ni
+        promesa de rentabilidad. Los CFD son contratos por diferencia y no
+        implican propiedad del activo subyacente.
+      </p>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
