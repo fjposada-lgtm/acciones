@@ -58,17 +58,9 @@ jobs:
           python-version: "3.11"
 
       # ------------------------------------------------------------------
-      # Barrera 1: el repositorio debe ser privado antes de tocar una captura.
-      # ------------------------------------------------------------------
-      - name: Comprobar que el repositorio sea privado
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          python -m scripts.cli check-repo
-
-      # ------------------------------------------------------------------
-      # Barrera 2: en las ejecuciones programadas, solo sigue la que coincide
-      # con las 08:00 de Santiago.
+      # Barrera 1: en las ejecuciones programadas, solo sigue la que coincide
+      # con las 08:00 de Santiago. Va primero para que el cron del huso que
+      # hoy no corresponde termine limpio, sin ruido ni avisos de fallo.
       # ------------------------------------------------------------------
       - name: Comprobar la ventana horaria de Chile
         id: ventana
@@ -78,14 +70,27 @@ jobs:
             --hora-objetivo 8 --tolerancia 1 \
             --github-output "$GITHUB_OUTPUT"
 
-      - name: Detener la ejecucion programada fuera de horario
+      - name: Anotar que esta ejecucion programada no corresponde
         if: >-
           github.event_name == 'schedule' &&
           steps.ventana.outputs.dentro_de_ventana != 'true'
         run: |
           echo "En Santiago todavia no son las 08:00. Esta ejecucion de cron"
           echo "corresponde al otro huso horario; no se genera informe."
-          exit 0
+          echo "Cron fuera de la ventana horaria de Chile. Sin informe." \
+            >> "$GITHUB_STEP_SUMMARY"
+
+      # ------------------------------------------------------------------
+      # Barrera 2: el repositorio debe ser privado antes de tocar una captura.
+      # ------------------------------------------------------------------
+      - name: Comprobar que el repositorio sea privado
+        if: >-
+          github.event_name != 'schedule' ||
+          steps.ventana.outputs.dentro_de_ventana == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python -m scripts.cli check-repo
 
       # ------------------------------------------------------------------
       # Buscar una captura nueva. "Sin datos nuevos" no es un error.
@@ -93,8 +98,10 @@ jobs:
       - name: Buscar una captura nueva
         id: scan
         if: >-
-          github.event_name != 'schedule' ||
-          steps.ventana.outputs.dentro_de_ventana == 'true'
+          success() && (
+            github.event_name != 'schedule' ||
+            steps.ventana.outputs.dentro_de_ventana == 'true'
+          )
         run: |
           python -m scripts.cli scan --github-output "$GITHUB_OUTPUT"
 
@@ -179,7 +186,9 @@ jobs:
             echo "No hay cambios que guardar."
           else
             git commit -m "Informe diario automatico ($(date -u +%Y-%m-%d))"
-            git push
+            # Si entretanto llego otra captura, reaplica el informe encima.
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
           fi
 
       # ------------------------------------------------------------------
